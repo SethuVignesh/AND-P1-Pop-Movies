@@ -16,19 +16,17 @@ import java.util.HashMap;
 
 public class CustomGridAdapter extends BaseAdapter {
     private Context mContext;
-    HashMap<String,BeanMovies> moviesList;
+    ArrayList<BeanMovies> moviesArrayListList;
 
-    private ArrayList<String> mKeys;
 
-    public CustomGridAdapter(Context c,HashMap<String,BeanMovies> _moviesList) {
+    public CustomGridAdapter(Context c,ArrayList<BeanMovies> _moviesArrayList) {
         mContext = c;
-        moviesList=_moviesList;
-        mKeys= new ArrayList<>(moviesList.keySet());
-//        mKeys = moviesList.keySet().toArray(new String[_moviesList.size()]);
+        moviesArrayListList=_moviesArrayList;
+
     }
 
     public int getCount() {
-        return moviesList.size();
+        return moviesArrayListList.size();
     }
 
     public Object getItem(int position) {
@@ -51,9 +49,11 @@ public class CustomGridAdapter extends BaseAdapter {
             rootView = inflater.inflate(R.layout.grid_single, null);
 
             ImageView imageView = (ImageView)rootView.findViewById(R.id.grid_image);
-            Picasso.with(mContext).load(moviesList.get(mKeys.get(position)).getImage_url()).into(imageView);
+            Picasso.with(mContext).load(moviesArrayListList.get(position).getImage_url()).into(imageView);
             TextView title=(TextView)rootView.findViewById(R.id.grid_text);
-            title.setText(moviesList.get(mKeys.get(position)).getTitle());
+            title.setText(moviesArrayListList.get(position).getTitle());
+
+
 
 
         } else {

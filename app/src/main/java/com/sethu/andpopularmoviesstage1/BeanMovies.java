@@ -1,9 +1,12 @@
 package com.sethu.andpopularmoviesstage1;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by sethu on 8/29/2016.
  */
-public class BeanMovies {
+public class BeanMovies implements Parcelable{
     private String title;
     private String image_url;
     private String overview;
@@ -60,5 +63,38 @@ public class BeanMovies {
     }
 
 
+    @Override
+    public int describeContents() {
+        return hashCode();
+    }
 
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(title);
+        parcel.writeString(image_url);
+        parcel.writeString(overview);
+        parcel.writeString(user_rating);
+        parcel.writeString(release_date);
+
+    }
+    // this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
+    public static final Parcelable.Creator<BeanMovies> CREATOR = new Parcelable.Creator<BeanMovies>() {
+        public BeanMovies createFromParcel(Parcel in) {
+            return new BeanMovies(in);
+        }
+
+        public BeanMovies[] newArray(int size) {
+            return new BeanMovies[size];
+        }
+    };
+
+    // example constructor that takes a Parcel and gives you an object populated with it's values
+    private BeanMovies(Parcel in) {
+//        mData = in.readInt();
+        title=in.readString();
+        image_url=in.readString();
+        overview=in.readString();
+        user_rating=in.readString();
+        release_date=in.readString();
+    }
 }

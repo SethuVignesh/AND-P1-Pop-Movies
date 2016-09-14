@@ -1,10 +1,15 @@
 package com.sethu.andpopularmoviesstage1;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,8 +58,9 @@ public class ItemListActivity extends AppCompatActivity {
     GridView grid;
     private static String LOG_TAG = ItemListActivity.class.getSimpleName();
     CustomGridAdapter adapter;
+    public static final String ARG_ITEM_ID = "item_id";
 
-    static HashMap<String,BeanMovies> moviesList= new HashMap<>();
+    static ArrayList<BeanMovies> moviesList= new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +71,7 @@ public class ItemListActivity extends AppCompatActivity {
         toolbar.setTitle(getTitle());
 //        moviesList();
 
-         adapter = new CustomGridAdapter(ItemListActivity.this,moviesList);
+        adapter = new CustomGridAdapter(ItemListActivity.this,moviesList);
         grid = (GridView) findViewById(R.id.gridView);
         grid.setAdapter(adapter);
         grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -77,7 +84,7 @@ public class ItemListActivity extends AppCompatActivity {
                 String selectedMovie = text.getText().toString();
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
-                    arguments.putString(ItemDetailFragment.ARG_ITEM_ID, moviesList.get(selectedMovie).getTitle());
+                    arguments.putParcelable(ItemDetailFragment.ARG_ITEM_ID, moviesList.get(position));
                     ItemDetailFragment fragment = new ItemDetailFragment();
                     fragment.setArguments(arguments);
                     getSupportFragmentManager().beginTransaction()
@@ -85,8 +92,7 @@ public class ItemListActivity extends AppCompatActivity {
                             .commit();
                 } else {
                     Intent intent = new Intent(ItemListActivity.this, ItemDetailActivity.class);
-                    intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, moviesList.get(selectedMovie).getTitle());
-
+                    intent.putExtra(ItemListActivity.ARG_ITEM_ID,moviesList.get(position));
                     startActivity(intent);
                 }
 
@@ -101,48 +107,84 @@ public class ItemListActivity extends AppCompatActivity {
             // activity should be in two-pane mode.
             mTwoPane = true;
         }
-        new FetchMoviesTask().execute();
+
+
+
+    }
+
+    private void fetchMovies() {
+        if(Utils.isNetworkAvailable(ItemListActivity.this)){
+        new FetchMoviesTask().execute();}else{
+            AlertDialog adb = new AlertDialog.Builder(ItemListActivity.this).setTitle("Internet Error").setMessage("Please check your Internet connection")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    // .setNegativeButton(android.R.string.no, new
+                    // DialogInterface.OnClickListener() {
+                    // public void onClick(DialogInterface dialog,
+                    // int which) {
+                    // // do nothing
+                    // }
+                    // })
+                    // .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+            adb.setCancelable(false);
+
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+
+
+            inflater.inflate(R.menu.item_list, menu);
+
+
         return super.onCreateOptionsMenu(menu);
     }
 
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
+
+            if (item.getItemId() == R.id.action_settings) {
+                Intent intent = new Intent(ItemListActivity.this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
+            }
+                return super.onOptionsItemSelected(item);
+
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fetchMovies();
+    }
 
-    public class FetchMoviesTask extends AsyncTask<Void, Void, HashMap<String,BeanMovies>> {
+    public class FetchMoviesTask extends AsyncTask<Void, Void, ArrayList<BeanMovies>> {
         private String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
         @Override
-        protected HashMap<String,BeanMovies> doInBackground(Void... params) {
+        protected ArrayList<BeanMovies> doInBackground(Void... params) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
-            int numDays = 7;
-            // Will contain the raw JSON response as a string.
             String movieslist = null;
 
             try {
-                // Construct the URL for the OpenWeatherMap query
-                // Possible parameters are avaiable at OWM's forecast API page, at
-                // http://openweathermap.org/API#forecast
-//                URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7&appid=9299d60a7ad6bab48c85dcda4a90680a");
-                String format = "json";
-                String units = "metric";
 
-                final String BASE_URL = "http://api.themoviedb.org/3/movie/popular";
+                SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(ItemListActivity.this);
+                String moviesType=sharedPreferences.getString(getString(R.string.sort_by_key),getString(R.string.default_value));
+                String BASE_URL = "http://api.themoviedb.org/3/movie/"+moviesType;
 
                 final String APPID_PARAM = "api_key";
                 Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                         .appendQueryParameter(APPID_PARAM, BuildConfig.THE_MOVIE_DB_API_KEY).build();
 
                 URL url = new URL(builtUri.toString());
-                // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
@@ -151,16 +193,12 @@ public class ItemListActivity extends AppCompatActivity {
                 InputStream inputStream = urlConnection.getInputStream();
                 StringBuffer buffer = new StringBuffer();
                 if (inputStream == null) {
-                    // Nothing to do.
                     return null;
                 }
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
                     buffer.append(line + "\n");
                 }
 
@@ -173,8 +211,6 @@ public class ItemListActivity extends AppCompatActivity {
 
             } catch (IOException e) {
                 Log.e("PlaceholderFragment", "Error ", e);
-                // If the code didn't successfully get the weather data, there's no point in attemping
-                // to parse it.
                 return null;
             } finally {
                 if (urlConnection != null) {
@@ -199,27 +235,40 @@ public class ItemListActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(final HashMap<String,BeanMovies> beanMovies) {
+        protected void onPostExecute(final ArrayList<BeanMovies> beanMovies) {
             super.onPostExecute(beanMovies);
-//            ArrayAdapter adapter= new ArrayAdapter(getActivity(),R.layout.list_item_forecasr,R.id.list_item_forecast_textview,strings);
-//            listView.setAdapter(adapter);
-//            adapter.clear();
-//            grid.setAdapter(adapter);
-            moviesList=beanMovies;
-
-            adapter = new CustomGridAdapter(ItemListActivity.this, moviesList);
+            if(beanMovies!=null){
+                moviesList=beanMovies;
+                adapter = new CustomGridAdapter(ItemListActivity.this, moviesList);
+                grid.setAdapter(adapter);
 
 
-            grid.setAdapter(adapter);
+                //PROGRAMATICALLY CLICKING THE FIRST ELEMENT
+                if(moviesList.size()>0){
+                     grid.performItemClick(
+                        grid.getAdapter().getView(0, null, null),
+                        0,
+                        grid.getAdapter().getItemId(0));}
+            }else{
+                //throw error dialog
+                AlertDialog adb = new AlertDialog.Builder(ItemListActivity.this).setTitle("Error").setMessage("Please try again")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                fetchMovies();
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+                adb.setCancelable(false);
+            }
 
         }
     }
 
 
-    private HashMap<String,BeanMovies> getMoviesDataFromJson(String moviesJsonStr)
+    private ArrayList<BeanMovies> getMoviesDataFromJson(String moviesJsonStr)
             throws JSONException {
-        HashMap<String,BeanMovies> moviesHashMap = new HashMap<>();
-        // These are the names of the JSON objects that need to be extracted.
+        ArrayList<BeanMovies> moviesHashMap = new ArrayList<>();
         final String MOVIES_RESULT = "results";
         final String MOVIES_ORIGINAL_TITLE = "original_title";
         final String MOVIES_POSTER_PATH = "poster_path";
@@ -253,11 +302,11 @@ public class ItemListActivity extends AppCompatActivity {
             beanMovies.setOverview(overview);
             beanMovies.setUser_rating(rating);
             beanMovies.setRelease_date(release_date);
-            moviesHashMap.put(beanMovies.getTitle(),beanMovies);
+            moviesHashMap.add(beanMovies);
         }
 
-        for (String s : moviesHashMap.keySet()) {
-            Log.v(LOG_TAG, "Movies entry: " + s);
+        for (BeanMovies s : moviesHashMap) {
+            Log.v(LOG_TAG, "Movies entry: " + s.getTitle());
         }
         return moviesHashMap;
 

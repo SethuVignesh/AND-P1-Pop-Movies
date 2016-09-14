@@ -50,7 +50,7 @@ public class ItemDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.item_detail, container, false);
 
-        BeanMovies movie= ItemListActivity.moviesList.get(getArguments().getString(ARG_ITEM_ID));
+        BeanMovies movie= (BeanMovies)getArguments().getParcelable(ARG_ITEM_ID);
 
         ImageView imageView = (ImageView) rootView.findViewById(R.id.imageViewPoster);
         Picasso.with(getActivity()).load(movie.getImage_url()).into(imageView);
