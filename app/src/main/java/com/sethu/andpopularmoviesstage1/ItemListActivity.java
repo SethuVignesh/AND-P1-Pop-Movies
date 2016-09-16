@@ -60,7 +60,7 @@ public class ItemListActivity extends AppCompatActivity {
     CustomGridAdapter adapter;
     public static final String ARG_ITEM_ID = "item_id";
 
-    static ArrayList<BeanMovies> moviesList= new ArrayList<>();
+     ArrayList<BeanMovies> moviesList= new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,8 +69,6 @@ public class ItemListActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
-//        moviesList();
-
         adapter = new CustomGridAdapter(ItemListActivity.this,moviesList);
         grid = (GridView) findViewById(R.id.gridView);
         grid.setAdapter(adapter);
@@ -238,13 +236,14 @@ public class ItemListActivity extends AppCompatActivity {
         protected void onPostExecute(final ArrayList<BeanMovies> beanMovies) {
             super.onPostExecute(beanMovies);
             if(beanMovies!=null){
+                moviesList.clear();
                 moviesList=beanMovies;
                 adapter = new CustomGridAdapter(ItemListActivity.this, moviesList);
                 grid.setAdapter(adapter);
 
 
                 //PROGRAMATICALLY CLICKING THE FIRST ELEMENT
-                if(moviesList.size()>0){
+                if(moviesList.size()>0 && mTwoPane){
                      grid.performItemClick(
                         grid.getAdapter().getView(0, null, null),
                         0,

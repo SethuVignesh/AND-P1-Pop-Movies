@@ -47,6 +47,10 @@ public class CustomGridAdapter extends BaseAdapter {
         if (convertView == null) {
 
             rootView = inflater.inflate(R.layout.grid_single, null);
+        } else {
+
+            rootView =  convertView;
+        }
 
             ImageView imageView = (ImageView)rootView.findViewById(R.id.grid_image);
             Picasso.with(mContext).load(moviesArrayListList.get(position).getImage_url()).into(imageView);
@@ -56,10 +60,7 @@ public class CustomGridAdapter extends BaseAdapter {
 
 
 
-        } else {
 
-            rootView = (View) convertView;
-        }
 
         return rootView;
     }
