@@ -18,7 +18,7 @@ android {
         }
     }
     buildTypes.each {
-        it.buildConfigField "String", "THE_MOVIE_DB_API_KEY", "\"fe235de65f31a04c729abbe71fc33ac3\""
+        it.buildConfigField "String", "THE_MOVIE_DB_API_KEY", "\"xxxxxxxxxx\""
     }
 }
 
@@ -30,4 +30,5 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:24.1.1'
     compile 'com.android.support:design:24.1.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.google.code.gson:gson:2.6.2'
 }

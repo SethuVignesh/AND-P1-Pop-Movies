@@ -1,32 +1,36 @@
 package com.sethu.andpopularmoviesstage1;
 
 import android.content.Context;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
-public class CustomGridAdapter extends BaseAdapter {
+/**
+ * Created by sethugayu on 10/5/16.
+ */
+public class CustomListAdapter extends BaseAdapter implements  RefreshGridView {
+
     private Context mContext;
-    ArrayList<BeanMovies> moviesArrayListList;
+    ArrayList<BeanReviews> reviewsArrayListList;
 
 
-    public CustomGridAdapter(Context c,ArrayList<BeanMovies> _moviesArrayList) {
+    public CustomListAdapter(Context c,ArrayList<BeanReviews> _reviewsArrayList) {
         mContext = c;
-        moviesArrayListList=_moviesArrayList;
+        reviewsArrayListList=_reviewsArrayList;
 
     }
 
     public int getCount() {
-        return moviesArrayListList.size();
+        return reviewsArrayListList.size();
     }
 
     public Object getItem(int position) {
@@ -46,21 +50,16 @@ public class CustomGridAdapter extends BaseAdapter {
 
         if (convertView == null) {
 
-            rootView = inflater.inflate(R.layout.grid_single, null);
+            rootView = inflater.inflate(R.layout.review_row, null);
         } else {
 
             rootView =  convertView;
         }
+        TextView tvAuthor=(TextView)rootView.findViewById(R.id.tvAuthor);
+        TextView tvReviews=(TextView)rootView.findViewById(R.id.tvReview);
 
-            ImageView imageView = (ImageView)rootView.findViewById(R.id.grid_image);
-            ImageView imageViewFav = (ImageView)rootView.findViewById(R.id.imageViewFav);
-            ArrayList<String> favList=Utils.getFavoritesList(mContext);
-        if(favList.contains(moviesArrayListList.get(position).getId())){
-            imageViewFav.setVisibility(View.VISIBLE);
-        }else{
-            imageViewFav.setVisibility(View.GONE);
-        }
-            Picasso.with(mContext).load(moviesArrayListList.get(position).getImage_url()).into(imageView);
+        tvAuthor.setText(reviewsArrayListList.get(position).getAuthor());
+        tvReviews.setText(reviewsArrayListList.get(position).getContent());
 //            TextView title=(TextView)rootView.findViewById(R.id.grid_text);
 //            title.setText(moviesArrayListList.get(position).getTitle());
 
@@ -71,6 +70,12 @@ public class CustomGridAdapter extends BaseAdapter {
 
         return rootView;
     }
+    @Override
+    public void refreshAdapter() {
 
+         notifyDataSetChanged();
+
+    }
 
 }
+

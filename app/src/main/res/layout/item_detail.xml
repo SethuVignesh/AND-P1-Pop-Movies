@@ -9,53 +9,83 @@
     tools:context="com.sethu.andpopularmoviesstage1.ItemDetailFragment"
     android:orientation="vertical" >
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/scrollView" >
+    <!--<ScrollView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/scrollView" >-->
 
-        <LinearLayout
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="@color/accent_material_light">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/ivBack"
+            android:src="@drawable/abc_ic_ab_back_material"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:paddingRight="5dp" />
+
+        <TextView
+            android:layout_width="247dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="INTERSTELLAR"
+            android:id="@+id/textViewTitle"
+            android:layout_gravity="left|center_vertical"
+            android:textColor="#ffffff"
+            android:layout_marginLeft="20dp"
+            android:singleLine="true" />
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/ivFavorites"
+            android:src="@drawable/favorites"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_gravity="center_vertical" />
+    </LinearLayout>
+
+    <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
+            android:focusableInTouchMode="true"
             android:layout_height="wrap_content">
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:background="@color/accent_material_light">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:text="INTERSTELLAR"
-                    android:id="@+id/textViewTitle"
-                    android:layout_gravity="left|center_vertical"
-                    android:textColor="#ffffff"
-                    android:layout_marginLeft="20dp" />
-            </FrameLayout>
-
-            <LinearLayout
+        <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp">
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/imageViewPoster"
-                    android:src="@drawable/default_icon"
-                    android:padding="10dp" />
+            <RelativeLayout
+                android:layout_width="150dp"
+                android:layout_height="150dp">
 
-                <LinearLayout
+                <ImageView
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:id="@+id/imageViewPoster"
+                        android:src="@drawable/default_icon"
+                        android:padding="10dp"
+                        android:layout_weight="1"
+                   />
+
+            </RelativeLayout>
+
+            <LinearLayout
                     android:orientation="vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/movieDetailsTextMargins"
                     android:layout_marginRight="@dimen/movieDetailsTextMargins"
-                    android:paddingTop="10dp">
+                    android:paddingTop="10dp"
+                    android:layout_weight="1">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -83,8 +113,11 @@
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="MARK AS FAVORITE"
-                        android:id="@+id/buttonFavorite" />
+                        android:text="MARK AS \nFAVORITE"
+                        android:id="@+id/buttonFavorite"
+                        android:background="@color/accent_material_dark"
+                        android:textStyle="normal"
+                        android:textAlignment="center" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -121,11 +154,44 @@
                 android:layout_marginBottom="10dp"
                 android:layout_marginLeft="15dp" />
 
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="100dp">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/imageView2"
+                    android:src="@drawable/play_icon"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/ivThumbNail"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/sampl_thumbnail"
+                    android:layout_weight="1"
+                    android:longClickable="false" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Reviews:"
+                android:id="@+id/textView3"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="15dp" />
+
             <ListView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/listView" />
+                android:id="@+id/listViewReviews" />
+
         </LinearLayout>
-    </ScrollView>
+
 
 </LinearLayout>

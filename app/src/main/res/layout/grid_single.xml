@@ -1,16 +1,19 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:padding="5dp" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="5dp"
+    android:weightSum="1">
 
     <ImageView
         android:id="@+id/grid_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        >
+        android:layout_width="160dp"
+        android:layout_height="245dp"
+        android:src="@drawable/default_icon"
+        android:layout_gravity="center_horizontal"
+       >
     </ImageView>
-
     <TextView
         android:id="@+id/grid_text"
         android:layout_width="wrap_content"
@@ -20,4 +23,14 @@
         android:textSize="9sp" >
     </TextView>
 
-</LinearLayout>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:id="@+id/imageViewFav"
+        android:src="@drawable/favorites"
+        android:layout_alignBottom="@+id/grid_image"
+        android:layout_alignRight="@+id/grid_image"
+        android:layout_alignEnd="@+id/grid_image"
+        android:background="@color/dim_foreground_disabled_material_dark" />
+
+</RelativeLayout>

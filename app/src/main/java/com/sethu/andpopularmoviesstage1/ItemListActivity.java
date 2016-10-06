@@ -26,6 +26,9 @@ import android.widget.GridView;
 import android.widget.TextView;
 
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,6 +37,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -48,7 +52,7 @@ import java.util.List;
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class ItemListActivity extends AppCompatActivity {
+public class ItemListActivity extends AppCompatActivity implements  RefreshGridView{
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -57,7 +61,7 @@ public class ItemListActivity extends AppCompatActivity {
     private boolean mTwoPane;
     GridView grid;
     private static String LOG_TAG = ItemListActivity.class.getSimpleName();
-    CustomGridAdapter adapter;
+    static CustomGridAdapter adapter;
     public static final String ARG_ITEM_ID = "item_id";
 
      ArrayList<BeanMovies> moviesList= new ArrayList<>();
@@ -69,6 +73,9 @@ public class ItemListActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
+        //TODO READ SHARED PREF value and set adapter
+
+        moviesList=getMoviesList();
         adapter = new CustomGridAdapter(ItemListActivity.this,moviesList);
         grid = (GridView) findViewById(R.id.gridView);
         grid.setAdapter(adapter);
@@ -93,10 +100,12 @@ public class ItemListActivity extends AppCompatActivity {
                     intent.putExtra(ItemListActivity.ARG_ITEM_ID,moviesList.get(position));
                     startActivity(intent);
                 }
-
+                grid.setItemChecked(position, true);
 
             }
         });
+        grid.getHeight();
+
 
         if (findViewById(R.id.item_detail_container) != null) {
             // The detail container view will be present only in the
@@ -161,6 +170,13 @@ public class ItemListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         fetchMovies();
+    }
+
+    @Override
+    public void refreshAdapter() {
+        if(adapter!=null){
+            adapter.notifyDataSetChanged();
+        }
     }
 
     public class FetchMoviesTask extends AsyncTask<Void, Void, ArrayList<BeanMovies>> {
@@ -238,7 +254,11 @@ public class ItemListActivity extends AppCompatActivity {
             if(beanMovies!=null){
                 moviesList.clear();
                 moviesList=beanMovies;
+                //to add to shared pref
+                //read shared pref and populate results
                 adapter = new CustomGridAdapter(ItemListActivity.this, moviesList);
+                saveInSharedPref(moviesList);
+
                 grid.setAdapter(adapter);
 
 
@@ -264,6 +284,30 @@ public class ItemListActivity extends AppCompatActivity {
         }
     }
 
+    private void saveInSharedPref(ArrayList<BeanMovies> moviesList) {
+        SharedPreferences appSharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(moviesList);
+        prefsEditor.putString("MyObject", json);
+        prefsEditor.commit();
+    }
+
+    private ArrayList<BeanMovies> getMoviesList(){
+        SharedPreferences appSharedPrefs = PreferenceManager
+                .getDefaultSharedPreferences(this.getApplicationContext());
+        Gson gson = new Gson();
+        String json = appSharedPrefs.getString("MyObject", "");
+//        ArrayList<BeanMovies> movieList = gson.fromJson(json,new ArrayList<BeanMovies>());
+        Type type = new TypeToken<ArrayList<BeanMovies>>(){}.getType();
+        ArrayList<BeanMovies> movieList= gson.fromJson(json, type);
+        if(movieList==null){
+            movieList= new ArrayList<BeanMovies>();
+        }
+        return movieList;
+    }
+
 
     private ArrayList<BeanMovies> getMoviesDataFromJson(String moviesJsonStr)
             throws JSONException {
@@ -274,6 +318,7 @@ public class ItemListActivity extends AppCompatActivity {
         final String MOVIES_OVERVIEW = "overview";
         final String MOVIES_AVERAGE_RATE = "vote_average";
         final String MOVIES_RELEASE_DATE = "release_date";
+        final String MOVIES_ID = "id";
 
 
         JSONObject moviesJson = new JSONObject(moviesJsonStr);
@@ -287,6 +332,7 @@ public class ItemListActivity extends AppCompatActivity {
             String overview;
             String rating;
             String release_date;
+            String movie_id;
             JSONObject movieJson = moviesArr.getJSONObject(i);
 
             title = movieJson.getString(MOVIES_ORIGINAL_TITLE);
@@ -294,6 +340,7 @@ public class ItemListActivity extends AppCompatActivity {
             overview = movieJson.getString(MOVIES_OVERVIEW);
             rating = movieJson.getString(MOVIES_AVERAGE_RATE);
             release_date = movieJson.getString(MOVIES_RELEASE_DATE);
+            movie_id=movieJson.getString(MOVIES_ID);
 
             BeanMovies beanMovies = new BeanMovies();
             beanMovies.setTitle(title);
@@ -301,6 +348,7 @@ public class ItemListActivity extends AppCompatActivity {
             beanMovies.setOverview(overview);
             beanMovies.setUser_rating(rating);
             beanMovies.setRelease_date(release_date);
+            beanMovies.setId(movie_id);
             moviesHashMap.add(beanMovies);
         }
 
