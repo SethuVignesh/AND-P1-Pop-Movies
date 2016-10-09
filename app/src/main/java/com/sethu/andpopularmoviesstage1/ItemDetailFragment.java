@@ -41,6 +41,7 @@ import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * A fragment representing a single Item detail screen.
@@ -92,7 +93,7 @@ public class ItemDetailFragment extends Fragment {
         ImageView backButton=(ImageView)rootView.findViewById(R.id.ivBack);
         final ImageView favorites=(ImageView)rootView.findViewById(R.id.ivFavorites);
         Button markAsFav=(Button)rootView.findViewById(R.id.buttonFavorite);
-        final ArrayList<String> favoritesList= Utils.getFavoritesList(getActivity());
+        final HashMap<String,BeanMovies> favoritesList= Utils.getFavoritesList(getActivity());
 
         favorites.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,7 +108,7 @@ public class ItemDetailFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
-                favoritesList.add(movie.getId());
+                favoritesList.put(movie.getId(),movie);
                 Utils.saveInSharedPref(favoritesList,getActivity());
                 favorites.setVisibility(View.VISIBLE);
                 refreshGridView.refreshAdapter();
@@ -115,7 +116,7 @@ public class ItemDetailFragment extends Fragment {
         });
 
 
-        if(favoritesList.contains(movie.getId())){
+        if(favoritesList.containsKey(movie.getId())){
             favorites.setVisibility(View.VISIBLE);
         }else{
             favorites.setVisibility(View.GONE);

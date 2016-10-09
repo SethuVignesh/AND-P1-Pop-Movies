@@ -187,64 +187,71 @@ public class ItemListActivity extends AppCompatActivity implements  RefreshGridV
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             String movieslist = null;
+            SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(ItemListActivity.this);
+            String moviesType=sharedPreferences.getString(getString(R.string.sort_by_key),getString(R.string.default_value));
+if(moviesType.equalsIgnoreCase(getResources().getString(R.string.favorites))){
 
+    HashMap<String,BeanMovies> favHashMap=Utils.getFavoritesList(ItemListActivity.this);
+    ArrayList<BeanMovies> favArrayList = new ArrayList<BeanMovies>(favHashMap.values());
+    return favArrayList;
+
+}else {
+
+    try {
+
+        String BASE_URL = "http://api.themoviedb.org/3/movie/" + moviesType;
+
+        final String APPID_PARAM = "api_key";
+        Uri builtUri = Uri.parse(BASE_URL).buildUpon()
+                .appendQueryParameter(APPID_PARAM, BuildConfig.THE_MOVIE_DB_API_KEY).build();
+
+        URL url = new URL(builtUri.toString());
+        urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestMethod("GET");
+        urlConnection.connect();
+
+        // Read the input stream into a String
+        InputStream inputStream = urlConnection.getInputStream();
+        StringBuffer buffer = new StringBuffer();
+        if (inputStream == null) {
+            return null;
+        }
+        reader = new BufferedReader(new InputStreamReader(inputStream));
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            buffer.append(line + "\n");
+        }
+
+        if (buffer.length() == 0) {
+            // Stream was empty.  No point in parsing.
+            return null;
+        }
+        movieslist = buffer.toString();
+        Log.v(LOG_TAG, "Popular Movies Json String " + movieslist);
+
+    } catch (IOException e) {
+        Log.e("PlaceholderFragment", "Error ", e);
+        return null;
+    } finally {
+        if (urlConnection != null) {
+            urlConnection.disconnect();
+        }
+        if (reader != null) {
             try {
-
-                SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(ItemListActivity.this);
-                String moviesType=sharedPreferences.getString(getString(R.string.sort_by_key),getString(R.string.default_value));
-                String BASE_URL = "http://api.themoviedb.org/3/movie/"+moviesType;
-
-                final String APPID_PARAM = "api_key";
-                Uri builtUri = Uri.parse(BASE_URL).buildUpon()
-                        .appendQueryParameter(APPID_PARAM, BuildConfig.THE_MOVIE_DB_API_KEY).build();
-
-                URL url = new URL(builtUri.toString());
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    return null;
-                }
-                movieslist = buffer.toString();
-                Log.v(LOG_TAG, "Popular Movies Json String " + movieslist);
-
-            } catch (IOException e) {
-                Log.e("PlaceholderFragment", "Error ", e);
-                return null;
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e("PlaceholderFragment", "Error closing stream", e);
-                    }
-                }
+                reader.close();
+            } catch (final IOException e) {
+                Log.e("PlaceholderFragment", "Error closing stream", e);
             }
+        }
+    }
 
-            try {
-                return getMoviesDataFromJson(movieslist);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
+    try {
+        return getMoviesDataFromJson(movieslist);
+    } catch (JSONException e) {
+        e.printStackTrace();
+    }
+}
             return null;
         }
 

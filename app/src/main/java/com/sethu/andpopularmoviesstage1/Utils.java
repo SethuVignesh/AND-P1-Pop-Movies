@@ -11,6 +11,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by sethugayu on 9/14/16.
@@ -22,7 +23,7 @@ public class Utils {
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
-    public static void saveInSharedPref(ArrayList<String> favoritesList,Context mcontext) {
+    public static void saveInSharedPref(HashMap<String,BeanMovies> favoritesList,Context mcontext) {
         SharedPreferences appSharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(mcontext);
         SharedPreferences.Editor prefsEditor = appSharedPrefs.edit();
@@ -32,16 +33,16 @@ public class Utils {
         prefsEditor.commit();
     }
 
-    public static ArrayList<String> getFavoritesList(Context mContext){
+    public static HashMap<String,BeanMovies> getFavoritesList(Context mContext){
         SharedPreferences appSharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(mContext);
         Gson gson = new Gson();
         String json = appSharedPrefs.getString("favorites", "");
 //        ArrayList<BeanMovies> movieList = gson.fromJson(json,new ArrayList<BeanMovies>());
-        Type type = new TypeToken<ArrayList<String>>(){}.getType();
-        ArrayList<String> favoriteList= gson.fromJson(json, type);
+        Type type = new TypeToken<HashMap<String,BeanMovies>>(){}.getType();
+        HashMap<String,BeanMovies> favoriteList= gson.fromJson(json, type);
         if(favoriteList==null){
-            favoriteList= new ArrayList<String>();
+            favoriteList= new HashMap<>();
         }
         return favoriteList;
     }
