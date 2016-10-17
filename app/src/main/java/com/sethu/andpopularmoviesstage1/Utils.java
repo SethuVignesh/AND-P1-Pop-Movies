@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -38,6 +39,7 @@ public class Utils {
                 .getDefaultSharedPreferences(mContext);
         Gson gson = new Gson();
         String json = appSharedPrefs.getString("favorites", "");
+        Log.d("","Favorites json"+json);
 //        ArrayList<BeanMovies> movieList = gson.fromJson(json,new ArrayList<BeanMovies>());
         Type type = new TypeToken<HashMap<String,BeanMovies>>(){}.getType();
         HashMap<String,BeanMovies> favoriteList= gson.fromJson(json, type);
